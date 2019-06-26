@@ -1,0 +1,37 @@
+
+export default function (server) {
+
+  server.route({
+    path: '/api/Hello6.7/search',
+    method: 'POST',
+    handler(req, reply) {
+	var names = [];
+	const query_param =  req.payload.searchterm;	
+	const { callWithRequest } = server.plugins.elasticsearch.getCluster('data');
+	const searchPayload = {
+		index: 'inspections',
+		_source: 'name'
+	}
+	return callWithRequest(req, 'search', searchPayload).then(response => {
+		
+		var respObj= JSON.stringify(response.hits.hits)
+		var hitsArr = JSON.parse(respObj)
+		
+		
+		for(var i = 0; i < hitsArr.length; i++) {
+			var obj = hitsArr[i];
+			console.log(obj._source.name);
+			names.push({"value":obj._source.name,
+			"inputDisplay":obj._source.name});
+		}
+		return ({result:JSON.stringify(names)})
+			
+		})
+		
+		
+	}
+	
+
+	  });
+
+}
